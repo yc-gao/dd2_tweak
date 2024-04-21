@@ -30,11 +30,27 @@ local human = character_manager:call('get_ManualPlayerHuman()')
 local job_context = human:call('get_JobContext()')
 local skill_context = human:call('get_SkillContext()')
 
-local SetSkills = function(job_context, skill_context, gui_manager, skills)
+local ApplyPreset = function()
+    local currentJob = job_context:get_field('CurrentJob')
+    local skills = config.presetSet[currentJob][config.currentPreset]
+    if skills == nil then
+        config.currentPreset = 0
+        return false
+    end
     for k, v in ipairs(skills) do
         skill_context:setSkill(job_context:get_field('CurrentJob'), v, k - 1)
     end
     gui_manager:call("setupKeyGuideCustomSkill()")
+    return true
+end
+
+local NextPreset = function()
+    config.currentPreset = config.currentPreset + 1
+    if not ApplyPreset() then
+        config.currentPreset = config.currentPreset + 1
+        return ApplyPreset()
+    end
+    return true
 end
 
 re.on_draw_ui(function()
