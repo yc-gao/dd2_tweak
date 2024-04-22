@@ -29,13 +29,13 @@ config = utils.tbl_merge({
 
 HotKeys.setup_hotkeys(config.Hotkeys)
 
-local gui_manager = sdk.get_managed_singleton("app.GuiManager")
-local character_manager = sdk.get_managed_singleton('app.CharacterManager')
-local human = character_manager:call('get_ManualPlayerHuman()')
-local job_context = human:call('get_JobContext()')
-local skill_context = human:call('get_SkillContext()')
-
 local ApplyPreset = function()
+    local gui_manager = sdk.get_managed_singleton("app.GuiManager")
+    local character_manager = sdk.get_managed_singleton('app.CharacterManager')
+    local human = character_manager:call('get_ManualPlayerHuman()')
+    local job_context = human:call('get_JobContext()')
+    local skill_context = human:call('get_SkillContext()')
+
     local currentJob = job_context:get_field('CurrentJob')
     local skills = config.presetSet[currentJob][config.currentPreset]
     if skills == nil then
@@ -59,6 +59,11 @@ local NextPreset = function()
 end
 
 local savePreset = function()
+    local character_manager = sdk.get_managed_singleton('app.CharacterManager')
+    local human = character_manager:call('get_ManualPlayerHuman()')
+    local job_context = human:call('get_JobContext()')
+    local skill_context = human:call('get_SkillContext()')
+
     local currentJob = job_context:get_field('CurrentJob')
     local skills = {}
     for i = 0, 3 do
@@ -67,13 +72,20 @@ local savePreset = function()
     table.insert(config.presetSet[currentJob], skills)
 end
 
+re.on_frame(function()
+    if HotKeys.check_hotkey("Switch Preset", false, true) then
+        NextPreset()
+    end
+end)
+
 re.on_draw_ui(function()
+    local character_manager = sdk.get_managed_singleton('app.CharacterManager')
+    local human = character_manager:call('get_ManualPlayerHuman()')
+    local job_context = human:call('get_JobContext()')
+
     if imgui.tree_node('True Warfarer') then
         if HotKeys.hotkey_setter("Switch Preset", false, 'Switch Preset') then
             HotKeys.update_hotkey_table(config.Hotkeys)
-        end
-        if HotKeys.check_hotkey("Switch Preset", false, true) then
-            NextPreset()
         end
         if imgui.button('Save Preset') then
             savePreset()
@@ -82,7 +94,7 @@ re.on_draw_ui(function()
         local presetSet = config.presetSet[job_context:get_field('CurrentJob')] or {}
         for i, v in ipairs(presetSet) do
             imgui.push_id('checkbox item ' .. i)
-            changed, selected = imgui.checkbox(
+            local changed, selected = imgui.checkbox(
                 'left: ' .. v[1] .. ' top: ' .. v[2] .. ' down: ' .. v[3] .. ' right: ' .. v[4],
                 config.currentPreset == i)
             imgui.pop_id()
