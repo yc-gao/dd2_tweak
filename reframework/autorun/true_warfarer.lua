@@ -4,6 +4,7 @@ local sdk = sdk
 local re = re
 local imgui = imgui
 
+local HotKeys = require('Hotkeys.Hotkeys')
 local utils = require('utils')
 
 local config = json.load_file('true_warfarer.json') or {}
@@ -20,9 +21,13 @@ config = utils.tbl_merge({
         [8] = {},  -- 魔弓手
         [9] = {},  -- 幻术师
         [10] = {}, -- 龙选者
+    },
+    Hotkeys = {
+        ["Switch Preset"] = "Space",
     }
 }, config)
 
+HotKeys.setup_hotkeys(config.Hotkeys)
 
 local gui_manager = sdk.get_managed_singleton("app.GuiManager")
 local character_manager = sdk.get_managed_singleton('app.CharacterManager')
@@ -53,9 +58,51 @@ local NextPreset = function()
     return true
 end
 
+local savePreset = function()
+    local currentJob = job_context:get_field('CurrentJob')
+    local skills = {}
+    for i = 0, 3 do
+        skills[i + 1] = skill_context:getSkillID(currentJob, i)
+    end
+    table.insert(config.presetSet[currentJob], skills)
+end
+
 re.on_draw_ui(function()
-    -- TODO: impl
     if imgui.tree_node('True Warfarer') then
+        if HotKeys.hotkey_setter("Switch Preset", false, 'Switch Preset') then
+            HotKeys.update_hotkey_table(config.Hotkeys)
+        end
+        if HotKeys.check_hotkey("Switch Preset", false, true) then
+            NextPreset()
+        end
+        if imgui.button('Save Preset') then
+            savePreset()
+        end
+        imgui.text('current job: ' .. job_context:get_field('CurrentJob'))
+        local presetSet = config.presetSet[job_context:get_field('CurrentJob')] or {}
+        for i, v in ipairs(presetSet) do
+            imgui.push_id('checkbox item ' .. i)
+            changed, selected = imgui.checkbox(
+                'left: ' .. v[1] .. ' top: ' .. v[2] .. ' down: ' .. v[3] .. ' right: ' .. v[4],
+                config.currentPreset == i)
+            imgui.pop_id()
+            if changed then
+                if selected then
+                    config.currentPreset = i
+                else
+                    config.currentPreset = 0
+                end
+            end
+            imgui.same_line()
+            imgui.push_id('preset del ' .. i)
+            if imgui.button('del') then
+                if config.currentPreset == i then
+                    config.currentPreset = 0
+                end
+                table.remove(presetSet, i)
+            end
+            imgui.pop_id()
+        end
     end
 end)
 re.on_config_save(function() json.dump_file('true_warfarer.json', config) end)
