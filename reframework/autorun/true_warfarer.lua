@@ -58,6 +58,15 @@ local NextPreset = function()
     return true
 end
 
+local DelPreset = function(idx)
+    if config.currentPreset == idx then
+        config.currentPreset = 0
+    elseif config.currentPreset > idx then
+        config.currentPreset = config.currentPreset - 1
+    end
+    table.remove(config.presetSet, idx)
+end
+
 local savePreset = function()
     local character_manager = sdk.get_managed_singleton('app.CharacterManager')
     local human = character_manager:call('get_ManualPlayerHuman()')
@@ -108,10 +117,7 @@ re.on_draw_ui(function()
             imgui.same_line()
             imgui.push_id('preset del ' .. i)
             if imgui.button('del') then
-                if config.currentPreset == i then
-                    config.currentPreset = 0
-                end
-                table.remove(presetSet, i)
+                DelPreset(i)
             end
             imgui.pop_id()
         end
