@@ -29,23 +29,23 @@ config = utils.tbl_merge({
 
 HotKeys.setup_hotkeys(config.Hotkeys)
 
-local ApplyPreset = function()
-    local gui_manager = sdk.get_managed_singleton("app.GuiManager")
-    local character_manager = sdk.get_managed_singleton('app.CharacterManager')
-    local human = character_manager:call('get_ManualPlayerHuman()')
-    local job_context = human:call('get_JobContext()')
-    local skill_context = human:call('get_SkillContext()')
+local GetGuiManager = utils.func_cache(function() return sdk.get_managed_singleton("app.GuiManager") end)
+local GetCharacterManager = utils.func_cache(function() return sdk.get_managed_singleton("app.CharacterManager") end)
+local GetPlayerHuman = utils.func_cache(function() return GetCharacterManager():call('get_ManualPlayerHuman()') end)
+local GetJobContext = utils.func_cache(function() return GetPlayerHuman():call('get_JobContext()') end)
+local GetSkillContext = utils.func_cache(function() return GetPlayerHuman():call('get_SkillContext()') end)
 
-    local currentJob = job_context:get_field('CurrentJob')
+local ApplyPreset = function()
+    local currentJob = GetJobContext():get_field('CurrentJob')
     local skills = config.presetSet[currentJob][config.currentPreset]
     if skills == nil then
         config.currentPreset = 0
         return false
     end
     for k, v in ipairs(skills) do
-        skill_context:setSkill(job_context:get_field('CurrentJob'), v, k - 1)
+        GetSkillContext():setSkill(GetJobContext():get_field('CurrentJob'), v, k - 1)
     end
-    gui_manager:call("setupKeyGuideCustomSkill()")
+    GetGuiManager():call("setupKeyGuideCustomSkill()")
     return true
 end
 
@@ -65,18 +65,14 @@ local DelPreset = function(idx)
         config.currentPreset = config.currentPreset - 1
     end
     table.remove(config.presetSet, idx)
+    ApplyPreset()
 end
 
 local savePreset = function()
-    local character_manager = sdk.get_managed_singleton('app.CharacterManager')
-    local human = character_manager:call('get_ManualPlayerHuman()')
-    local job_context = human:call('get_JobContext()')
-    local skill_context = human:call('get_SkillContext()')
-
-    local currentJob = job_context:get_field('CurrentJob')
+    local currentJob = GetJobContext():get_field('CurrentJob')
     local skills = {}
     for i = 0, 3 do
-        skills[i + 1] = skill_context:getSkillID(currentJob, i)
+        skills[i + 1] = GetSkillContext():getSkillID(currentJob, i)
     end
     table.insert(config.presetSet[currentJob], skills)
 end
@@ -88,10 +84,6 @@ re.on_frame(function()
 end)
 
 re.on_draw_ui(function()
-    local character_manager = sdk.get_managed_singleton('app.CharacterManager')
-    local human = character_manager:call('get_ManualPlayerHuman()')
-    local job_context = human:call('get_JobContext()')
-
     if imgui.tree_node('True Warfarer') then
         if HotKeys.hotkey_setter("Switch Preset", false, 'Switch Preset') then
             HotKeys.update_hotkey_table(config.Hotkeys)
@@ -99,8 +91,8 @@ re.on_draw_ui(function()
         if imgui.button('Save Preset') then
             savePreset()
         end
-        imgui.text('current job: ' .. job_context:get_field('CurrentJob'))
-        local presetSet = config.presetSet[job_context:get_field('CurrentJob')] or {}
+        imgui.text('current job: ' .. GetJobContext():get_field('CurrentJob'))
+        local presetSet = config.presetSet[GetJobContext():get_field('CurrentJob')] or {}
         for i, v in ipairs(presetSet) do
             imgui.push_id('checkbox item ' .. i)
             local changed, selected = imgui.checkbox(

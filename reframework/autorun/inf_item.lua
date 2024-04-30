@@ -4,6 +4,8 @@ local sdk = sdk
 local re = re
 local imgui = imgui
 
+local utils = require('utils')
+
 -- local item_manager_t = sdk.find_type_definition('app.ItemManager')
 -- sdk.hook(
 --     item_manager_t:get_method(
@@ -16,22 +18,23 @@ local imgui = imgui
 --     end
 -- )
 
+local GetCharacterManager = utils.func_cache(function() return sdk.get_managed_singleton('app.CharacterManager') end)
+local GetItemManager = utils.func_cache(function() return sdk.get_managed_singleton('app.ItemManager') end)
+
 re.on_draw_ui(function()
     if imgui.tree_node('Inf Item') then
         if imgui.button('Get Ferrystone') then
-            local character_manager = sdk.get_managed_singleton('app.CharacterManager')
-            local human = character_manager:call('get_ManualPlayerHuman()')
+            local human = GetCharacterManager():call('get_ManualPlayerHuman()')
+            local item_manager = GetItemManager()
 
-            local item_manager = sdk.get_managed_singleton('app.ItemManager')
             item_manager:call('getItem', 80, 1, item_manager:call('getCharaId(app.Character)', human:call('get_Chara()')),
                 true, false, false, 2)
         end
 
         if imgui.button('Get Portcrystal') then
-            local character_manager = sdk.get_managed_singleton('app.CharacterManager')
-            local human = character_manager:call('get_ManualPlayerHuman()')
+            local human = GetCharacterManager():call('get_ManualPlayerHuman()')
+            local item_manager = GetItemManager()
 
-            local item_manager = sdk.get_managed_singleton('app.ItemManager')
             item_manager:call('getItem', 81, 1, item_manager:call('getCharaId(app.Character)', human:call('get_Chara()')),
                 true, false, false, 2)
         end

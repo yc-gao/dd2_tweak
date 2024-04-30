@@ -19,5 +19,14 @@ function utils.tbl_merge(...)
     return result
 end
 
-return utils
+function utils.func_cache(f)
+    local val = nil
+    return function()
+        if val == nil then
+            val = f()
+        end
+        return val
+    end
+end
 
+return utils
