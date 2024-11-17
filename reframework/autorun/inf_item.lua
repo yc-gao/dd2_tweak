@@ -30,7 +30,7 @@ local GetItemManager = utils.func_cache(function() return sdk.get_managed_single
 re.on_draw_ui(function()
     imgui.push_font(fontCN)
     if imgui.tree_node('Inf Item') then
-        if imgui.button('获取 飞石') then
+        if imgui.button('飞石') then
             local human = GetCharacterManager():call('get_ManualPlayerHuman()')
             local item_manager = GetItemManager()
 
@@ -38,7 +38,7 @@ re.on_draw_ui(function()
                 true, false, false, 2)
         end
 
-        if imgui.button('获取 基石') then
+        if imgui.button('基石') then
             local human = GetCharacterManager():call('get_ManualPlayerHuman()')
             local item_manager = GetItemManager()
 
