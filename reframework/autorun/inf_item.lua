@@ -4,10 +4,7 @@ local sdk = sdk
 local re = re
 local imgui = imgui
 
-local utils = require('utils')
-
 local CN_FONT_NAME = 'SourceHanSansCN-Bold.otf'
-
 local CN_FONT_SIZE = 18
 local CJK_GLYPH_RANGES = {
     0x0020, 0x00FF, -- Basic Latin + Latin Supplement
@@ -24,25 +21,21 @@ local CJK_GLYPH_RANGES = {
 }
 local fontCN = imgui.load_font(CN_FONT_NAME, CN_FONT_SIZE, CJK_GLYPH_RANGES)
 
-local GetCharacterManager = utils.func_cache(function() return sdk.get_managed_singleton('app.CharacterManager') end)
-local GetItemManager = utils.func_cache(function() return sdk.get_managed_singleton('app.ItemManager') end)
+local character_manager = sdk.get_managed_singleton('app.CharacterManager')
+local item_manager = sdk.get_managed_singleton('app.ItemManager')
 
 re.on_draw_ui(function()
     imgui.push_font(fontCN)
     if imgui.tree_node('Inf Item') then
         if imgui.button('飞石') then
-            local human = GetCharacterManager():call('get_ManualPlayerHuman()')
-            local item_manager = GetItemManager()
-
-            item_manager:call('getItem', 80, 1, item_manager:call('getCharaId(app.Character)', human:call('get_Chara()')),
+            item_manager:call('getItem', 80, 1,
+                item_manager:call('getCharaId(app.Character)', character_manager:call('get_Chara()')),
                 true, false, false, 2)
         end
 
         if imgui.button('基石') then
-            local human = GetCharacterManager():call('get_ManualPlayerHuman()')
-            local item_manager = GetItemManager()
-
-            item_manager:call('getItem', 81, 1, item_manager:call('getCharaId(app.Character)', human:call('get_Chara()')),
+            item_manager:call('getItem', 81, 1,
+                item_manager:call('getCharaId(app.Character)', character_manager:call('get_Chara()')),
                 true, false, false, 2)
         end
     end
