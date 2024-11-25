@@ -9,7 +9,20 @@ local utils = require('utils')
 local config = json.load_file('inf_item.json') or {}
 config = utils.tbl_merge({}, config)
 
-local fontCN = imgui.load_font('SourceHanSansCN-Bold.otf', 18)
+local CJK_GLYPH_RANGES = {
+    0x0020, 0x00FF, -- Basic Latin + Latin Supplement
+    0x2000, 0x206F, -- General Punctuation
+    0x3000, 0x30FF, -- CJK Symbols and Punctuations, Hiragana, Katakana
+    0x3130, 0x318F, -- Hangul Compatibility Jamo
+    0x31F0, 0x31FF, -- Katakana Phonetic Extensions
+    0xFF00, 0xFFEF, -- Half-width characters
+    0x4e00, 0x9FAF, -- CJK Ideograms
+    0xA960, 0xA97F, -- Hangul Jamo Extended-A
+    0xAC00, 0xD7A3, -- Hangul Syllables
+    0xD7B0, 0xD7FF, -- Hangul Jamo Extended-B
+    0,
+}
+local fontCN = imgui.load_font('SourceHanSansCN-Bold.otf', 18, CJK_GLYPH_RANGES)
 
 local character_manager = sdk.get_managed_singleton('app.CharacterManager')
 local item_manager = sdk.get_managed_singleton('app.ItemManager')
