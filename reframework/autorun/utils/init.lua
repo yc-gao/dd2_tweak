@@ -29,4 +29,20 @@ function utils.func_cache(f)
     end
 end
 
+function utils.sequence(st, ed)
+    local tmp = {}
+    for i = st, ed-1 do
+        tmp[#tmp+1] = i
+    end
+    return tmp
+end
+
+function utils.transform(seq, f)
+    local tmp = {}
+    for idx, val in pairs(seq) do
+        tmp[idx] = f(val)
+    end
+    return tmp
+end
+
 return utils
