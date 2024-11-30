@@ -21,7 +21,6 @@ local CJK_GLYPH_RANGES = {
 }
 local fontCN = imgui.load_font('SourceHanSansCN-Bold.otf', 18, CJK_GLYPH_RANGES)
 
-
 local config = json.load_file('custom_enhance.json') or {}
 config = utils.tbl_merge({
     Enable = true,
@@ -30,41 +29,50 @@ config = utils.tbl_merge({
     PriceX10 = true,
 }, config)
 
-local stamina_manager_t = sdk.find_type_definition('app.StaminaManager')
-sdk.hook(stamina_manager_t:get_method('add(System.Single, System.Boolean)'),
-    function(args)
-        if config.Enable and config.InfStamina then
-            local v = sdk.to_float(args[3])
-            if v < 0 then
-                return sdk.PreHookResult.SKIP_ORIGINAL
+local function InfStamina()
+    local stamina_manager_t = sdk.find_type_definition('app.StaminaManager')
+    sdk.hook(stamina_manager_t:get_method('add(System.Single, System.Boolean)'),
+        function(args)
+            if config.Enable and config.InfStamina then
+                local v = sdk.to_float(args[3])
+                if v < 0 then
+                    return sdk.PreHookResult.SKIP_ORIGINAL
+                end
             end
-        end
-        return sdk.PreHookResult.CALL_ORIGINAL
-    end,
-    nil
-)
+            return sdk.PreHookResult.CALL_ORIGINAL
+        end,
+        nil
+    )
+end
+InfStamina()
 
-local item_manager_t = sdk.find_type_definition('app.ItemManager')
-sdk.hook(item_manager_t:get_method('getWeightRank(System.Single, System.Single)'),
-    nil,
-    function(retval)
-        if config.Enable and config.InfWeight then
-            return sdk.to_ptr(0)
+local function InfWeight()
+    local item_manager_t = sdk.find_type_definition('app.ItemManager')
+    sdk.hook(item_manager_t:get_method('getWeightRank(System.Single, System.Single)'),
+        nil,
+        function(retval)
+            if config.Enable and config.InfWeight then
+                return sdk.to_ptr(0)
+            end
+            return retval
         end
-        return retval
-    end
-)
+    )
+end
+InfWeight()
 
-local item_common_param_t = sdk.find_type_definition('app.ItemCommonParam')
-sdk.hook(item_common_param_t:get_method('get_SellPrice()'),
-    nil,
-    function(retval)
-        if config.Enable and config.PriceX10 then
-            return sdk.to_ptr((sdk.to_int64(retval) & 0xFFFFFFFF) * 10)
+local function PriceX10()
+    local item_common_param_t = sdk.find_type_definition('app.ItemCommonParam')
+    sdk.hook(item_common_param_t:get_method('get_SellPrice()'),
+        nil,
+        function(retval)
+            if config.Enable and config.PriceX10 then
+                return sdk.to_ptr((sdk.to_int64(retval) & 0xFFFFFFFF) * 10)
+            end
+            return retval
         end
-        return retval
-    end
-)
+    )
+end
+PriceX10()
 
 local character_manager = sdk.get_managed_singleton('app.CharacterManager')
 local item_manager = sdk.get_managed_singleton('app.ItemManager')
