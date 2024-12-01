@@ -31,8 +31,8 @@ end
 
 function utils.sequence(st, ed)
     local tmp = {}
-    for i = st, ed-1 do
-        tmp[#tmp+1] = i
+    for i = st, ed - 1 do
+        tmp[#tmp + 1] = i
     end
     return tmp
 end
