@@ -25,7 +25,10 @@ local fontCN = imgui.load_font('SourceHanSansCN-Bold.otf', 18, CJK_GLYPH_RANGES)
 local config = json.load_file('skill_switcher.json') or {}
 config = utils.tbl_merge({
     Enable = true,
-    Hotkeys = { ["SwitchKey"] = "RB (R1)" },
+    Hotkeys = {
+        ["NextKey"] = "Right",
+        ["PrevKey"] = "Left"
+    },
     CurrentPreset = 0,
     Presets = {},
     JobNames = {},
@@ -116,10 +119,6 @@ re.on_draw_ui(function()
             end
         end
         imgui.same_line()
-        local changed = hotkeys.hotkey_setter("SwitchKey")
-        if changed then
-            hotkeys.update_hotkey_table(config.Hotkeys)
-        end
         imgui.text('current job: ' .. config.JobNames[tostring(GetCurrentJob())])
         imgui.text('total presets: ' .. #config.Presets)
         imgui.text('current preset: ' .. config.CurrentPreset)
@@ -144,9 +143,17 @@ re.on_draw_ui(function()
 end)
 
 re.on_frame(function()
-    if hotkeys.check_hotkey('SwitchKey') then
+    if hotkeys.check_hotkey('NextKey') then
         if #config.Presets > 0 then
             config.CurrentPreset = config.CurrentPreset % #config.Presets + 1
+            UpdateSkills()
+        else
+            config.CurrentPreset = 0
+        end
+    end
+    if hotkeys.check_hotkey('PrevKey') then
+        if #config.Presets > 0 then
+            config.CurrentPreset = (config.CurrentPreset - 2) % #config.Presets + 1
             UpdateSkills()
         else
             config.CurrentPreset = 0

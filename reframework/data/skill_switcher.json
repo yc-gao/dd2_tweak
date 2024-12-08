@@ -1,8 +1,9 @@
 {
-    "CurrentPreset": 1,
+    "CurrentPreset": 2,
     "Enable": true,
     "Hotkeys": {
-        "SwitchKey": "Right"
+        "NextKey": "Right",
+        "PrevKey": "Left"
     },
     "JobNames": {
         "1": "战士",
@@ -21,11 +22,17 @@
             26,
             64,
             25,
-            62
+            63
         ],
         [
-            67,
+            26,
             64,
+            67,
+            63
+        ],
+        [
+            65,
+            27,
             68,
             69
         ]
