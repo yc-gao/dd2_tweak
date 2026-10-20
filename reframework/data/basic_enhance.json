@@ -1,5 +1,4 @@
 {
     "InfStamina": true,
-    "InfWeight": true,
-    "RefreshBossFaster": false
+    "InfWeight": true
 }
